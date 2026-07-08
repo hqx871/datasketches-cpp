@@ -28,6 +28,7 @@ template<typename A>
 class CouponHashSet : public CouponList<A> {
   public:
     static CouponHashSet* newSet(const void* bytes, size_t len, const A& allocator);
+    static void merge(const void* bytes, size_t len, hll_sketch_alloc<A> &dst, const A& allocator);
     static CouponHashSet* newSet(std::istream& is, const A& allocator);
     CouponHashSet(uint8_t lgConfigK, target_hll_type tgtHllType, const A& allocator);
     CouponHashSet(const CouponHashSet& that, target_hll_type tgtHllType);

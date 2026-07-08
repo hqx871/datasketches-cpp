@@ -65,6 +65,11 @@ hll_sketch_alloc<A> hll_sketch_alloc<A>::deserialize(const void* bytes, size_t l
 }
 
 template<typename A>
+void hll_sketch_alloc<A>::deserialize_and_merge(const void* bytes, size_t len, hll_sketch_alloc<A>& dst, const A& allocator) {
+    HllSketchImplFactory<A>::deserialize_and_merge(bytes, len, dst, allocator);
+}
+
+template<typename A>
 hll_sketch_alloc<A>::~hll_sketch_alloc() {
   if (sketch_impl != nullptr) {
     sketch_impl->get_deleter()(sketch_impl);

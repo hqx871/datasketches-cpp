@@ -38,6 +38,7 @@ class HllSketchImplFactory final {
 public:
   static HllSketchImpl<A>* deserialize(std::istream& os, const A& allocator);
   static HllSketchImpl<A>* deserialize(const void* bytes, size_t len, const A& allocator);
+  static void deserialize_and_merge(const void *bytes, size_t len, hll_sketch_alloc<A> &dst, const A &allocator);
 
   static CouponHashSet<A>* promoteListToSet(const CouponList<A>& list);
   static HllArray<A>* promoteListOrSetToHll(const CouponList<A>& list);
@@ -102,6 +103,23 @@ HllSketchImpl<A>* HllSketchImplFactory<A>::deserialize(const void* bytes, size_t
   } else {
     throw std::invalid_argument("Attempt to deserialize unknown object type");
   }
+}
+
+template<typename A>
+void HllSketchImplFactory<A>::deserialize_and_merge(const void* bytes, size_t len, hll_sketch_alloc<A> &dst, const A& allocator) {
+    // read current mode directly
+    const uint8_t preInts = static_cast<const uint8_t*>(bytes)[0];
+    if (preInts == hll_constants::HLL_PREINTS) {
+        hll_sketch_alloc<A> src(HllArray<A>::newHll(bytes, len, allocator));
+        dst.update(src);
+    } else if (preInts == hll_constants::HASH_SET_PREINTS) {
+        CouponHashSet<A>::merge(bytes, len, dst, allocator);
+    } else if (preInts == hll_constants::LIST_PREINTS) {
+        hll_sketch_alloc<A> src(CouponList<A>::newList(bytes, len, allocator));
+        dst.update(src);
+    } else {
+        throw std::invalid_argument("Attempt to deserialize unknown object type");
+    }
 }
 
 template<typename A>

@@ -123,6 +123,72 @@ CouponHashSet<A>* CouponHashSet<A>::newSet(const void* bytes, size_t len, const 
 }
 
 template<typename A>
+void CouponHashSet<A>::merge(const void* bytes, size_t len, hll_sketch_alloc<A> &dst, const A& allocator) {
+  if (len < hll_constants::HASH_SET_INT_ARR_START) { // hard-coded
+    throw std::out_of_range("Input data length insufficient to hold CouponHashSet");
+  }
+
+  const uint8_t* data = static_cast<const uint8_t*>(bytes);
+  if (data[hll_constants::PREAMBLE_INTS_BYTE] != hll_constants::HASH_SET_PREINTS) {
+    throw std::invalid_argument("Incorrect number of preInts in input stream");
+  }
+  if (data[hll_constants::SER_VER_BYTE] != hll_constants::SER_VER) {
+    throw std::invalid_argument("Wrong ser ver in input stream");
+  }
+  if (data[hll_constants::FAMILY_BYTE] != hll_constants::FAMILY_ID) {
+    throw std::invalid_argument("Input stream is not an HLL sketch");
+  }
+
+  const hll_mode mode = HllSketchImpl<A>::extractCurMode(data[hll_constants::MODE_BYTE]);
+  if (mode != SET) {
+    throw std::invalid_argument("Calling set constructor with non-set mode data");
+  }
+
+  const target_hll_type tgtHllType = HllSketchImpl<A>::extractTgtHllType(data[hll_constants::MODE_BYTE]);
+
+  const uint8_t lgK = data[hll_constants::LG_K_BYTE];
+  if (lgK <= 7) {
+    throw std::invalid_argument("Attempt to deserialize invalid CouponHashSet with lgConfigK <= 7. Found: "
+                                + std::to_string(lgK));
+  }
+  uint8_t lgArrInts = data[hll_constants::LG_ARR_BYTE];
+  const bool compactFlag = ((data[hll_constants::FLAGS_BYTE] & hll_constants::COMPACT_FLAG_MASK) ? true : false);
+
+  uint32_t couponCount;
+  std::memcpy(&couponCount, data + hll_constants::HASH_SET_COUNT_INT, sizeof(couponCount));
+  if (lgArrInts < hll_constants::LG_INIT_SET_SIZE) {
+    lgArrInts = HllUtil<>::computeLgArrInts(SET, couponCount, lgK);
+  }
+  // Don't set couponCount in sketch here;
+  // we'll set later if updatable, and increment with updates if compact
+  const uint32_t couponsInArray = (compactFlag ? couponCount : (1 << lgArrInts));
+  const size_t expectedLength = hll_constants::HASH_SET_INT_ARR_START + (couponsInArray * sizeof(uint32_t));
+  if (len < expectedLength) {
+    throw std::out_of_range("Byte array too short for sketch. Expected " + std::to_string(expectedLength)
+                                + ", found: " + std::to_string(len));
+  }
+
+  if (compactFlag) {
+    const uint8_t* curPos = data + hll_constants::HASH_SET_INT_ARR_START;
+    uint32_t coupon;
+    for (uint32_t i = 0; i < couponCount; ++i, curPos += sizeof(coupon)) {
+      std::memcpy(&coupon, curPos, sizeof(coupon));
+      //sketch->couponUpdate(coupon);
+      dst.coupon_update(coupon);
+    }
+  } else {
+    ChsAlloc chsa(allocator);
+    CouponHashSet<A>* sketch = new (chsa.allocate(1)) CouponHashSet<A>(lgK, tgtHllType, allocator);
+    sketch->coupons_.resize(1ULL << lgArrInts);
+    sketch->couponCount_ = couponCount;
+    std::memcpy(sketch->coupons_.data(),
+                data + hll_constants::HASH_SET_INT_ARR_START,
+                couponsInArray * sizeof(uint32_t));
+    dst.merge(sketch);
+  }
+}
+
+template<typename A>
 CouponHashSet<A>* CouponHashSet<A>::newSet(std::istream& is, const A& allocator) {
   uint8_t listHeader[8];
   read(is, listHeader, 8 * sizeof(uint8_t));

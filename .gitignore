@@ -40,3 +40,4 @@ _*/
 
 # exceptions
 !__init__.py
+.idea/
