@@ -121,7 +121,7 @@ void hll_union_alloc<A>::update(const void* data, size_t length_bytes) {
 
 template<typename A>
 void hll_union_alloc<A>::coupon_update(uint32_t coupon) {
-  if (coupon == HllUtil<A>::EMPTY) { return; }
+  if (coupon == hll_constants::EMPTY) { return; }
   HllSketchImpl<A>* result = gadget_.sketch_impl->coupon_update(coupon);
   if (result != gadget_.sketch_impl) {
     if (gadget_.sketch_impl != nullptr) { gadget_.sketch_impl->get_deleter()(gadget_.sketch_impl); }
