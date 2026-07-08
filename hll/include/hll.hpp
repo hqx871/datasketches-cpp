@@ -112,6 +112,7 @@ template<typename A> using vector_u8 = std::vector<uint8_t, AllocU8<A>>;
 template<typename A = std::allocator<uint8_t> >
 class hll_sketch_alloc final {
   public:
+    explicit hll_sketch_alloc(HllSketchImpl<A>* that);
     /**
      * Constructs a new HLL sketch.
      * @param lg_config_k Sketch can hold 2^lg_config_k rows
@@ -382,7 +383,6 @@ class hll_sketch_alloc final {
                               uint8_t lg_config_k, uint8_t num_std_dev);
 
   private:
-    explicit hll_sketch_alloc(HllSketchImpl<A>* that);
 
     void coupon_update(uint32_t coupon);
 
