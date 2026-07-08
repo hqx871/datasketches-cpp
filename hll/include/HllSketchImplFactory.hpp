@@ -110,12 +110,14 @@ void HllSketchImplFactory<A>::deserialize_and_merge(const void* bytes, size_t le
     // read current mode directly
     const uint8_t preInts = static_cast<const uint8_t*>(bytes)[0];
     if (preInts == hll_constants::HLL_PREINTS) {
-        hll_sketch_alloc<A> src(HllArray<A>::newHll(bytes, len, allocator));
+        HllSketchImpl<A>* impl = HllArray<A>::newHll(bytes, len, allocator);
+        hll_sketch_alloc<A> src(impl);
         dst.update(src);
     } else if (preInts == hll_constants::HASH_SET_PREINTS) {
         CouponHashSet<A>::merge(bytes, len, dst, allocator);
     } else if (preInts == hll_constants::LIST_PREINTS) {
-        hll_sketch_alloc<A> src(CouponList<A>::newList(bytes, len, allocator));
+        HllSketchImpl<A>* impl = HllArray<A>::newHll(bytes, len, allocator);
+        hll_sketch_alloc<A> src(impl);
         dst.update(src);
     } else {
         throw std::invalid_argument("Attempt to deserialize unknown object type");
