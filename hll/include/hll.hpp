@@ -382,9 +382,9 @@ class hll_sketch_alloc final {
     static double get_rel_err(bool upper_bound, bool unioned,
                               uint8_t lg_config_k, uint8_t num_std_dev);
 
-  private:
-
     void coupon_update(uint32_t coupon);
+
+  private:
 
     std::string type_as_string() const;
     std::string mode_as_string() const;
