@@ -174,7 +174,7 @@ void CouponHashSet<A>::merge(const void* bytes, size_t len, hll_union_alloc<A> &
     for (uint32_t i = 0; i < couponCount; ++i, curPos += sizeof(coupon)) {
       std::memcpy(&coupon, curPos, sizeof(coupon));
       //sketch->couponUpdate(coupon);
-      dst.coupon_update(coupon);
+      dst.couponUpdate(coupon);
     }
   } else {
     ChsAlloc chsa(allocator);

@@ -151,7 +151,7 @@ class hll_sketch_alloc final {
      */
     static hll_sketch_alloc deserialize(const void* bytes, size_t len, const A& allocator = A());
 
-    static void deserialize_and_merge(const void* bytes, size_t len, hll_union_alloc<A>& dst_union, const A& allocator = A());
+    static void deserializeAndMerge(const void* bytes, size_t len, hll_union_alloc<A>& dst_union, const A& allocator = A());
 
     //! Class destructor
     virtual ~hll_sketch_alloc();
@@ -382,9 +382,13 @@ class hll_sketch_alloc final {
     static double get_rel_err(bool upper_bound, bool unioned,
                               uint8_t lg_config_k, uint8_t num_std_dev);
 
-    void coupon_update(uint32_t coupon);
+    void couponUpdate(uint32_t coupon) {
+        coupon_update(coupon);
+    }
 
   private:
+
+    void coupon_update(uint32_t coupon);
 
     std::string type_as_string() const;
     std::string mode_as_string() const;
@@ -603,7 +607,9 @@ class hll_union_alloc {
     static double get_rel_err(bool upper_bound, bool unioned,
                               uint8_t lg_config_k, uint8_t num_std_dev);
 
-    void coupon_update(uint32_t coupon);
+    void couponUpdate(uint32_t coupon) {
+        coupon_update(coupon);
+    }
 
   private:
 
@@ -619,6 +625,8 @@ class hll_union_alloc {
     inline void union_impl(const hll_sketch_alloc<A>& sketch, uint8_t lg_max_k);
 
     static HllSketchImpl<A>* copy_or_downsample(const HllSketchImpl<A>* src_impl, uint8_t tgt_lg_k);
+
+    void coupon_update(uint32_t coupon);
 
     hll_mode get_current_mode() const;
     bool is_out_of_order_flag() const;
