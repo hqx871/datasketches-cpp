@@ -184,7 +184,7 @@ void CouponHashSet<A>::merge(const void* bytes, size_t len, hll_union_alloc<A> &
     std::memcpy(sketch->coupons_.data(),
                 data + hll_constants::HASH_SET_INT_ARR_START,
                 couponsInArray * sizeof(uint32_t));
-    dst.merge(sketch);
+    dst.update(sketch);
   }
 }
 
