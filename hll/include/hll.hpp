@@ -603,6 +603,8 @@ class hll_union_alloc {
     static double get_rel_err(bool upper_bound, bool unioned,
                               uint8_t lg_config_k, uint8_t num_std_dev);
 
+    void coupon_update(uint32_t coupon);
+
   private:
 
    /**
@@ -617,8 +619,6 @@ class hll_union_alloc {
     inline void union_impl(const hll_sketch_alloc<A>& sketch, uint8_t lg_max_k);
 
     static HllSketchImpl<A>* copy_or_downsample(const HllSketchImpl<A>* src_impl, uint8_t tgt_lg_k);
-
-    void coupon_update(uint32_t coupon);
 
     hll_mode get_current_mode() const;
     bool is_out_of_order_flag() const;
