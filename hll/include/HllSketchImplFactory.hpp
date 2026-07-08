@@ -38,7 +38,7 @@ class HllSketchImplFactory final {
 public:
   static HllSketchImpl<A>* deserialize(std::istream& os, const A& allocator);
   static HllSketchImpl<A>* deserialize(const void* bytes, size_t len, const A& allocator);
-  static void deserialize_and_merge(const void *bytes, size_t len, hll_sketch_alloc<A> &dst, const A &allocator);
+  static void deserialize_and_merge(const void *bytes, size_t len, hll_union_alloc<A> &dst, const A &allocator);
 
   static CouponHashSet<A>* promoteListToSet(const CouponList<A>& list);
   static HllArray<A>* promoteListOrSetToHll(const CouponList<A>& list);
@@ -106,7 +106,7 @@ HllSketchImpl<A>* HllSketchImplFactory<A>::deserialize(const void* bytes, size_t
 }
 
 template<typename A>
-void HllSketchImplFactory<A>::deserialize_and_merge(const void* bytes, size_t len, hll_sketch_alloc<A> &dst, const A& allocator) {
+void HllSketchImplFactory<A>::deserialize_and_merge(const void* bytes, size_t len, hll_union_alloc<A> &dst, const A& allocator) {
     // read current mode directly
     const uint8_t preInts = static_cast<const uint8_t*>(bytes)[0];
     if (preInts == hll_constants::HLL_PREINTS) {

@@ -150,7 +150,7 @@ class hll_sketch_alloc final {
      */
     static hll_sketch_alloc deserialize(const void* bytes, size_t len, const A& allocator = A());
 
-    static void deserialize_and_merge(const void* bytes, size_t len, hll_sketch_alloc& dst_union, const A& allocator = A());
+    static void deserialize_and_merge(const void* bytes, size_t len, hll_union_alloc<A>& dst_union, const A& allocator = A());
 
     //! Class destructor
     virtual ~hll_sketch_alloc();

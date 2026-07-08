@@ -123,7 +123,7 @@ CouponHashSet<A>* CouponHashSet<A>::newSet(const void* bytes, size_t len, const 
 }
 
 template<typename A>
-void CouponHashSet<A>::merge(const void* bytes, size_t len, hll_sketch_alloc<A> &dst, const A& allocator) {
+void CouponHashSet<A>::merge(const void* bytes, size_t len, hll_union_alloc<A> &dst, const A& allocator) {
   if (len < hll_constants::HASH_SET_INT_ARR_START) { // hard-coded
     throw std::out_of_range("Input data length insufficient to hold CouponHashSet");
   }
